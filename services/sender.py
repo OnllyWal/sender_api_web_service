@@ -31,19 +31,19 @@ class EmailSender:
         msg.attach(MIMEText(body_content, 'plain'))
 
         # Adiciona os anexos
-        for attachment_path in email_obj.attachments:
-            part = MIMEBase('application', 'vnd.openxmlformats-officedocument.wordprocessingml.document')
-            
-            try:
-                with open(attachment_path, 'rb') as attachment:
-                    part.set_payload(attachment.read())
-                    encoders.encode_base64(part)
-                    filename = "Ans" + os.path.basename(attachment_path)
-                    print(filename)
-                    part.add_header('Content-Disposition', f'attachment; filename= {filename}')
-                    msg.attach(part)
-            except Exception as e:
-                print("Erro ao Anexar")
+        if email_obj.attachments:
+            for attachment_path in email_obj.attachments:
+                part = MIMEBase('application', 'vnd.openxmlformats-officedocument.wordprocessingml.document')
+                
+                try:
+                    with open(attachment_path, 'rb') as attachment:
+                        part.set_payload(attachment.read())
+                        encoders.encode_base64(part)
+                        filename = os.path.basename(attachment_path)
+                        part.add_header('Content-Disposition', f'attachment; filename= {filename}')
+                        msg.attach(part)
+                except Exception as e:
+                    print("Erro ao Anexar")
 
         # Envia o email
         self.connection.sendmail(self.email_address, destinatario, msg.as_string())

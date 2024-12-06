@@ -1,5 +1,5 @@
 class Email:
-    def __init__(self, sender_name: str, complete_name: str, email_name: str, body: str, attachments: list, subject: str, origin_address : str, origin_name :str):
+    def __init__(self, sender_name: str, complete_name: str, email_name: str, body: str, attachments: list, subject: str):
         """Inicializa o objeto Email com os parâmetros fornecidos."""
         self.sender_name = sender_name
         self.complete_name = complete_name

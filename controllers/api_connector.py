@@ -1,6 +1,5 @@
 import requests
 import os
-import json
 from models.email_model import Email
 def get_emails(endpoint_url):
     try:
@@ -19,9 +18,13 @@ def download_files(files_path):
     try:
         n_path = []
         for path in files_path:
-            response = requests.get(f"http://172.19.113.12:5000/{path}", stream=True)
-            if response.status_cod  == 200:
-                file_path = os.path.join("/home/wal/APIPropos/sender_api_web_service",path)
+            path = path.replace("{", '').replace("}", '')
+            response = requests.get(f"http://172.19.113.12:5000{path}", stream=True)
+            if response.status_code  == 200:
+                file_path = f"/home/wal/sender_api_web_service{path}"
+                print("\n_________________________________________\n")
+                if not os.path.exists("/home/wal/sender_api_web_service/download"):
+                    os.makedirs(os.path.dirname(file_path))
                 n_path.append(file_path)
                 with open(file_path, "wb") as file:
                     for chunk in response.iter_content(chunk_size=81920):
@@ -54,18 +57,21 @@ def remove_docs(paths):
 
 def process_email(email,sender):
     # Manipula os dados recebidos conforme a necessidade
-    destinatario = "ppcomp.ifes@gmail.com"
+    destinatario = "walcandeia@gmail.com"
     id = email['id']
-    files_path = email["anexos"]
-    email["anexos"] = download_files(files_path)
+    if email['tipo'] == "Defesa":
+        files_path = email['anexos']
+        print(files_path)
+        email['anexos'] = download_files(files_path)
+        print(email['anexos'])
     email_obj = json_to_email(email)
     sender.send_email(email_obj, destinatario)
-    remove_docs(email["anexos"])
+    sender.send_email(email_obj, email['origin_address'])
     email['status'] = 'Enviado'
-    id = email["id"]
 
     return email, id
 
 def update_email(email, id):
     response = requests.put(f"http://172.19.113.12:5000/emails/{id}", json=email)
     print(response.json)
+    remove_docs(email['anexos'])
